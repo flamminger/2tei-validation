@@ -65,16 +65,16 @@ def extract_xpaths_from_directory(directory, truncate=False):
     return list(xpaths)
 
 
-directory_path = "fsdb/data/db/mom-data/metadata.charter.public/"
+directory_path = "data/db/mom-data/metadata.charter.public/"
 
 xpath_result = extract_xpaths_from_directory(directory_path)
-with open("fsdb/data/out/xpaths.txt", mode="w") as f:
+with open("data/out/xpaths.txt", mode="w") as f:
     for line in sorted(xpath_result):
         f.write(f"{line}\n") 
 
 
 xpath_result_truncate = extract_xpaths_from_directory(directory_path, truncate=True)
-with open("fsdb/data/out/xpaths_truncated.txt", mode="w") as f:
+with open("data/out/xpaths_truncated.txt", mode="w") as f:
     for line in sorted(xpath_result_truncate):
         f.write(f"{line}\n")
 
