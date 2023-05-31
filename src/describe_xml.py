@@ -49,7 +49,6 @@ def extract_xpaths_from_file(file_path, truncate):
 
 def extract_xpaths_from_directory(directory, truncate=False):
     xpaths = set()
-
     file_paths = []
     for root, _, files in os.walk(directory):
         for file_name in files:
@@ -65,48 +64,15 @@ def extract_xpaths_from_directory(directory, truncate=False):
     return list(xpaths)
 
 
+
 directory_path = "data/db/mom-data/metadata.charter.public/"
 
 xpath_result = extract_xpaths_from_directory(directory_path)
-with open("data/out/xpaths.txt", mode="w") as f:
+with open("data_push/out/xpaths.txt", mode="w") as f:
     for line in sorted(xpath_result):
         f.write(f"{line}\n") 
 
-
 xpath_result_truncate = extract_xpaths_from_directory(directory_path, truncate=True)
-with open("data/out/xpaths_truncated.txt", mode="w") as f:
+with open("data_push/out/xpaths_truncated.txt", mode="w") as f:
     for line in sorted(xpath_result_truncate):
         f.write(f"{line}\n")
-
-
-
-
-# TODO: print custom tree
-#  def generate_xml_structure(xpath_list):
-#     root_element = {}
-
-#     for xpath in xpath_list:
-#         elements = xpath.strip('/').split('/')
-#         current_element = root_element
-
-#         for element in elements:
-#             if element not in current_element:
-#                 current_element[element] = {}
-#             current_element = current_element[element]
-
-#     def generate_indentation(indent_level):
-#         return '  ' * 2 * indent_level
-
-#     def generate_xml_element(element, indent_level=0):
-#         result = ''
-#         indentation = generate_indentation(indent_level)
-
-#         for key, value in element.items():
-#             result += f"{indentation}<{key}>\n"
-#             result += generate_xml_element(value, indent_level + 1)
-#             result += f"{indentation}</{key}>\n"
-
-#         return result
-
-#     xml_structure = generate_xml_element(root_element)
-#     print(xml_structure)
