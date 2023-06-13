@@ -1,8 +1,15 @@
+import json
 import unittest
 import xml.etree.ElementTree as ET
 import logging
 
-from settings import input, output
+
+with open('settings.json', 'r', encoding='utf-8') as settings_file:
+    settings = json.load(settings_file)
+
+input_path = settings['input_directory']
+output_path = settings['output_directory']
+style_path = settings['xslt_stylesheet']
 
 # TODO add separate test for deeply nested elements
 
