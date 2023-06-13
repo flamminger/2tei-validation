@@ -42,7 +42,7 @@ def transform_xml_file(input_file, output_dir, xslt_bytes):
 
     # Save the transformed XML to the output file
     with open(output_file, 'wb') as file:
-        file.write(etree.tostring(output_xml, pretty_print=True))
+        file.write(etree.tostring(output_xml, pretty_print=True, encoding='utf-8'))
 
     print(f"Transformed '{input_file}' -> '{output_file}'")
 
