@@ -14,37 +14,40 @@ output_path = settings['output_directory']
 style_path = settings['xslt_stylesheet']
 
 
-def transform_xml_file(input_file, output_dir, xslt_bytes):
+def transform_xml_file(input_file, output_dir, xslt_file):
     """
     transforms XML file using a provided XSLT stylesheet
     :param input_file:
     :param output_dir:
-    :param xslt_bytes:
+    :param xslt_file:
     :return:
     """
-    # Parse the XSLT stylesheet
-    xslt = etree.fromstring(xslt_bytes)
+    try:
+        # Load the input XML
+        input_xml = etree.parse(input_file)
 
-    # Load the input XML
-    input_xml = etree.parse(input_file)
+        # Load and parse the XSLT stylesheet
+        xslt = etree.parse(xslt_file)
+        transformer = etree.XSLT(xslt)
 
-    # Create the XSLT transformer
-    transformer = etree.XSLT(xslt)
+        # Apply the transformation
+        output_xml = transformer(input_xml)
 
-    # Apply the transformation
-    output_xml = transformer(input_xml)
+        # Make sure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
 
-    # Make sure the output directory exists
-    os.makedirs(output_dir, exist_ok=True)
+        # Get the output file path
+        output_file = os.path.join(output_dir, os.path.basename(input_file))
 
-    # Get the output file path
-    output_file = os.path.join(output_dir, os.path.basename(input_file))
+        # Save the transformed XML to the output file
+        output_xml_bytes = etree.tostring(output_xml, pretty_print=True, encoding='UTF-8')
+        with open(output_file, 'wb') as file:
+            file.write(output_xml_bytes)
 
-    # Save the transformed XML to the output file
-    with open(output_file, 'wb') as file:
-        file.write(etree.tostring(output_xml, pretty_print=True, encoding='utf-8'))
+        print(f"Transformed '{input_file}' -> '{output_file}'")
 
-    print(f"Transformed '{input_file}' -> '{output_file}'")
+    except etree.XSLTApplyError as error_message:
+        print(f"Error transforming file {input_file}: {str(error_message)}")
 
 
 def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
@@ -56,10 +59,6 @@ def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
     :param num_processes:
     :return:
     """
-    # Read the XSLT file into bytes
-    with open(xslt_file, 'rb') as file:
-        xslt_bytes = file.read()
-
     # Create a process pool
     pool = Pool(num_processes)
 
@@ -77,9 +76,8 @@ def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
             output_subdir = os.path.join(output_dir, relative_path)
 
             # Apply transformation to each file using multiple processes
-            result = pool.apply_async(transform_xml_file, args=(input_file,
-                                                                output_subdir, xslt_bytes))
-
+            result = pool.apply_async(transform_xml_file,
+                                      args=(input_file, output_subdir, xslt_file))
             # Append the result to the results list
             results.append(result)
 
