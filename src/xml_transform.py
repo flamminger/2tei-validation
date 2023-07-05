@@ -3,6 +3,7 @@ Transform XML files utilizing multithreading
 """
 import os
 import json
+import csv
 from multiprocessing import Pool
 from lxml import etree
 
@@ -12,6 +13,7 @@ with open('settings.json', 'r', encoding='utf-8') as settings_file:
 input_path = settings['input_directory']
 output_path = settings['output_directory']
 style_path = settings['xslt_stylesheet']
+error_log_path = settings.get('error_log', 'error_log.csv')
 
 
 def transform_xml_file(input_file, output_dir, xslt_file):
@@ -45,9 +47,11 @@ def transform_xml_file(input_file, output_dir, xslt_file):
             file.write(output_xml_bytes)
 
         print(f"Transformed '{input_file}' -> '{output_file}'")
+        return None
 
     except etree.XSLTApplyError as error_message:
         print(f"Error transforming file {input_file}: {str(error_message)}")
+        return input_file, str(error_message)
 
 
 def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
@@ -85,11 +89,21 @@ def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
     pool.close()
 
     # Call get() on each result to wait for the transformations to complete
+    errors = []
     for result in results:
-        result.get()
+        error = result.get()
+        if error is not None:
+            errors.append(error)
 
     # Wait for all processes to finish
     pool.join()
+
+    # Write any errors to the log
+    if errors:
+        with open(error_log_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["filename", "error_message"])
+            writer.writerows(errors)
 
 
 def main():
@@ -97,7 +111,7 @@ def main():
     set paths and number of process for transformation
     :return:
     """
-    # Example usage
+    # usage
     input_directory = input_path
     output_directory = output_path
     xslt_stylesheet = style_path
