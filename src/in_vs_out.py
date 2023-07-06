@@ -71,9 +71,13 @@ def create_test(source_file, target_file):
                 for source_text, target_text in zip(source_texts, target_texts):
                     similarity = jaccard_similarity(source_text, target_text)
 
-                    logging.info(f"Jaccard similarity for {source_tags} and {target_tags}: {similarity}")
+                    # logging.info(f"Jaccard similarity for {source_tags} and {target_tags}: {similarity}")
+
+                    if similarity < 0.9:
+                        print(f"CEI: {source_text}\n TEI: {target_text}")
+
                     self.assertGreater(similarity, 0.9,
-                                       f"Low similarity between source tags {source_tags} and target tags {target_tags}")
+                                       f"Low similarity between source tags {source_tags} and target tags {target_tags} \n")
 
     return TestXMLTransform
 
