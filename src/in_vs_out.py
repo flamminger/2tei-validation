@@ -4,6 +4,12 @@ import xml.etree.ElementTree as ET
 import logging
 import os
 import glob
+import csv
+
+# Add this at the start of your script to create/open the CSV file
+log_file = open('log.csv', 'w', newline='')
+log_writer = csv.writer(log_file)
+log_writer.writerow(['ID', 'Similarity Value'])
 
 with open('transform_settings.json', 'r', encoding='utf-8') as settings_file:
     settings = json.load(settings_file)
@@ -22,6 +28,7 @@ atom = "{http://www.w3.org/2001/XMLSchema-instance}"
 input_files = glob.glob(os.path.join(input_dir, '**', '*.xml'), recursive=True)
 output_files = glob.glob(os.path.join(output_dir, '**', '*.xml'), recursive=True)
 
+# TODO look into mismatched directories
 # Ensure both directories have the same number of files
 assert len(input_files) == len(output_files), "Mismatch in number of input and output files."
 
@@ -71,6 +78,10 @@ def create_test(source_file, target_file):
                 for source_text, target_text in zip(source_texts, target_texts):
                     similarity = jaccard_similarity(source_text, target_text)
 
+                    # Get the ID of the input document
+                    id_elem = source_tree.find(f".//{atom}id")
+                    doc_id = id_elem.text if id_elem is not None else "N/A"
+
                     # logging.info(f"Jaccard similarity for {source_tags} and {target_tags}: {similarity}")
 
                     if similarity < 0.9:
@@ -89,6 +100,7 @@ for i in range(len(input_files)):
     test_case = create_test(input_files[i], output_files[i])
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(test_case))
 
+log_file.close()
 
 if __name__ == '__main__':
     # Run all the tests in the test suite
