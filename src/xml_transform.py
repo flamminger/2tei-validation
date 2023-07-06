@@ -7,7 +7,7 @@ import csv
 from multiprocessing import Pool
 from lxml import etree
 
-with open('settings.json', 'r', encoding='utf-8') as settings_file:
+with open('transform_settings.json', 'r', encoding='utf-8') as settings_file:
     settings = json.load(settings_file)
 
 input_path = settings['input_directory']
@@ -72,12 +72,17 @@ def transform_xml_files(input_dir, output_dir, xslt_file, num_processes=4):
     # Walk through input directory recursively
     for root, dirs, files in os.walk(input_dir):
         xml_files = [file for file in files if file.endswith('.xml')]
+
+        # Maintain the same directory structure in the output directory
+        relative_path = os.path.relpath(root, input_dir)
+        output_subdir = os.path.join(output_dir, relative_path)
+
+        # If the directory has no XML files, create an empty directory in the output directory
+        if not xml_files:
+            os.makedirs(output_subdir, exist_ok=True)
+
         for file in xml_files:
             input_file = os.path.join(root, file)
-
-            # Maintain the same directory structure in the output directory
-            relative_path = os.path.relpath(root, input_dir)
-            output_subdir = os.path.join(output_dir, relative_path)
 
             # Apply transformation to each file using multiple processes
             result = pool.apply_async(transform_xml_file,
@@ -118,6 +123,7 @@ def main():
     num_processes = 4
 
     transform_xml_files(input_directory, output_directory, xslt_stylesheet, num_processes)
+
 
 if __name__ == '__main__':
     main()

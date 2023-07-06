@@ -160,7 +160,8 @@ cython_debug/
 .idea/
 /data/
 /src/log.txt
-/src/settings.json
+/src/transform_settings.json
+/src/test_settings.json
 /output/
 /validated/
 /logging/
